@@ -36,7 +36,6 @@ exports.handler = async(event, context, callback) => {
     console.log("Received event:", JSON.stringify(event, null, 4));
     const emailTrackingDynamoDBTable = process.env.EmailTrackingDynamoDBTable;
     const emailTrackingDynamoDBRegion = process.env.EmailTrackingDynamoDBRegion;
-    const domainEnvironment = process.env.DomainEnvironment;
     // Set the region
     AWS.config.update({ region: emailTrackingDynamoDBRegion });
     const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
@@ -47,8 +46,8 @@ exports.handler = async(event, context, callback) => {
     const messageType = parsedMessage.message_type;
     const userToken = parsedMessage.userToken;
     const userEmail = parsedMessage.username;
-    const first_name = parsedMessage.first_name;
-    const last_name = parsedMessage.last_name;
+    const firstname = parsedMessage.firstname;
+    const lastname = parsedMessage.lastname;
     const emailAlreadySent = await checkIfEmailSentAlready(
         dynamoDbClient,
         emailTrackingDynamoDBTable,
@@ -66,16 +65,16 @@ exports.handler = async(event, context, callback) => {
                 Body: {
                     Html: {
                         Charset: "UTF-8",
-                        Data: `<p>Hello ${first_name} ${last_name},</p>
-            <p>To verify your email address with prod.mikea1.me, Please click the following link: <a href="https://prod.mikea1.me/v1/verifyUserEmail?email=${userEmail}&token=${userToken}">Verify Email</a> or paste the following link in the browser: https://prod.mikea1.me/v1/verifyUserEmail?email=${userEmail}&token=${userToken}</p>`,
+                        Data: `<p>Hello ${firstname} ${lastname},</p>
+            <p>To verify your email address with prod.mikea1.me, Please click the following link: <a href="https://prod.mikea1.me/v1/verifyUserEmail?email=${userEmail}&userToken=${userToken}">Verify Email</a> or paste the following link in the browser: https://prod.mikea1.me/v1/verifyUserEmail?email=${userEmail}&userToken=${userToken}</p>`,
                     },
                 },
                 Subject: {
                     Charset: "UTF-8",
-                    Data: `Verify you user account for $prod.mikea1.me`,
+                    Data: `Verify you user account for prod.mikea1.me`,
                 },
             },
-            Source: `userverification@$prod.mikea1.me`,
+            Source: `userverification@prod.mikea1.me`,
         };
         const data = await ses.sendEmail(params).promise();
         console.log(data);
