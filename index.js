@@ -1,4 +1,5 @@
 const AWS = require("aws-sdk");
+
 const checkIfEmailSentAlready = async(
     dynamoDbClient,
     emailTrackingDynamoDBTable,
